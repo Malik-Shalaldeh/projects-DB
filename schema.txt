@@ -1,0 +1,34 @@
+drop table DEPARTMENTS cascade constraints purge
+/
+drop table EMPLOYEES cascade constraints purge
+/
+create table EMPLOYEES
+(
+empno number(4) constraint E_EMPNO_PK primary key constraint E_EMPNO_CHK check(empno>7000),
+ename varchar2(8) constraint E_ENAME_NN not null,
+job varchar2(8),
+mgr number(4) constraint E_MGR_FK references employees,
+bdate date constraint E_DBATE_NN not null,
+msal number(6,2) constraint E_MSAL_NN not null,
+comm number(6,2),
+deptno number(2) default 10 constraint E_DEPTNO_NN not null
+)
+/
+create table DEPARTMENTS
+(
+deptno number(2) constraint D_DEPTNO_PK primary key 
+		 constraint D_DEPTNO_CHK check(mod(deptno,10)=0),
+dname varchar2(10) constraint D_DNAME_NN not null
+		   constraint D_DNAME_UN unique
+		   constraint D_DNAME_CHK check(dname = upper(dname)),
+location varchar2(8) constraint D_LOCATION_NN not null,
+mgr number(4) constraint D_MGR_FK references EMPLOYEES
+)
+/
+alter table employees
+modify(deptno constraint E_DEPTNO_FK references DEPARTMENTS)
+/
+alter table departments modify(mgr constraint D_MGR_NN not null)
+/
+alter table departments disable constraint D_MGR_NN
+/

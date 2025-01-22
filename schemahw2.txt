@@ -1,0 +1,87 @@
+alter session 
+set nls_date_format = 'dd/mm/yyyy'
+/
+create table  Subscribers (
+    subno number(5) constraint S_SUBNO_PK primary key ,
+    subname varchar2(10) constraint S_SUBNAME_NN not null ,
+    gender varchar2(10) constraint S_GENDER_NN not null  
+                     constraint S_GENDER_CH CHECK (gender = 'male' OR gender = 'female'),
+    subDate DATE CONSTRAINT S_SUBDATE_NN NOT NULL 
+)
+/
+create table  Books (
+    bookno number(5) constraint B_BOOKNO_PK primary key ,
+    title varchar2(10) constraint B_TITLE_NN not null ,
+    class varchar2(10) constraint B_CLASS_NN not null ,
+    publish varchar2(10) constraint B_PUBLISH_NN not null 
+)
+/
+create table Borrow (
+    bookno number(5),
+    subno number(5),
+    bordate date constraint B_BORDATE_NN not null ,
+    returndate DATE ,
+    FOREIGN KEY (bookno) REFERENCES Books(bookno) ON DELETE CASCADE,
+    FOREIGN KEY (subno) REFERENCES Subscribers(subno) ON DELETE CASCADE,
+    constraint B_PK primary key  (bookno ,subno ,bordate )
+)
+/
+create or replace trigger Borrow_Check_ReturnDate
+before insert OR update ON Borrow
+for each row 
+begin
+    if :NEW.returndate IS NOT NULL AND :NEW.returndate <= :NEW.bordate THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Return date must be greater than borrow date.');
+    end if ;
+end;
+/
+create or replace trigger Subscribers_Check_SubDate
+before insert OR update ON Subscribers
+for each row 
+begin
+    IF :NEW.subDate > TRUNC(SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Subscription date must be today or later.');
+    end if ;
+end;
+/
+insert into Subscribers values(1 , 'malik' , 'male' , '2/10/2020')
+/
+insert into Subscribers values(2 , 'ahmad' , 'male' , '15/6/2011')
+/
+insert into Subscribers values(3 , 'rawan' , 'female' , '7/5/2023')
+/
+insert into Subscribers values(4 , 'lena' , 'female' , '6/12/2007')
+/
+insert into Subscribers values(5 , 'mohammad' , 'male' , '20/1/2018')
+/
+insert INTO Books  VALUES (101, 'Book1', 'Fiction', 'Pub1')
+/
+insert INTO Books  VALUES (102, 'Book2', 'Science', 'Pub2')
+/
+insert INTO Books  VALUES (103, 'Book3', 'History', 'Pub3')
+/
+insert INTO Books  VALUES (104, 'Book4', 'Fiction', 'Pub4')
+/
+insert INTO Books  VALUES (105, 'Book5', 'Technology', 'Pub5')
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (101, 1, SYSDATE, SYSDATE + 7)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (102, 2, SYSDATE, SYSDATE + 10)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (103, 3, SYSDATE, SYSDATE + 5)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (104, 4, SYSDATE, SYSDATE + 14)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (105, 5, SYSDATE, SYSDATE + 21)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (101, 2, SYSDATE, SYSDATE + 3)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (102, 3, SYSDATE, SYSDATE + 9)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (103, 4, SYSDATE, SYSDATE + 15)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (104, 5, SYSDATE, SYSDATE + 2)
+/
+INSERT INTO Borrow (bookno, subno, bordate, returndate) VALUES (105, 1, SYSDATE, SYSDATE + 30)
+/
+

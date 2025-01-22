@@ -1,0 +1,30 @@
+select subno, subname
+from subscribers
+where (sysdate - subdate)/365 > 10
+/
+select bookno, title
+from Books
+where class = 'Technology'
+order by title DESC
+
+/
+select subname
+from Subscribers
+where gender = 'male' and subDate > (
+      select subDate
+      from Subscribers
+      where subno = 5
+  )
+/
+select bookno,subno,bordate, (returndate - bordate) as borrow_days,
+    CASE 
+        when (returndate - bordate) > 7 then ((returndate - bordate) - 7) * 5
+        else 0
+        end as fee,
+    ((returndate - bordate) * 1) + 
+    CASE 
+        WHEN (returndate - bordate) > 7 THEN ((returndate - bordate) - 7) * 5
+        ELSE 0
+    end as invoice
+from Borrow
+/
